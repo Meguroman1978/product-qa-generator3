@@ -1,0 +1,1322 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商品Q&A自動生成システム Premium v4.7</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .version {
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 30px;
+        }
+
+        .input-section {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: #555;
+            font-weight: 600;
+        }
+
+        input[type="url"], select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="url"]:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .api-key-section {
+            margin-top: 20px;
+            padding: 20px;
+            background: #fff3cd;
+            border-radius: 10px;
+            border-left: 4px solid #ffc107;
+        }
+
+        .api-key-section h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .api-key-section p {
+            color: #856404;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+
+        .options-section {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .option-group {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+        }
+
+        .option-group h4 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1em;
+        }
+
+        .option-group p {
+            color: #666;
+            font-size: 0.85em;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .generate-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 20px;
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .generate-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .progress-section {
+            display: none;
+            margin: 30px 0;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 15px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e9ecef;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .status-message {
+            color: #555;
+            text-align: center;
+            font-size: 1.1em;
+        }
+
+        .results-section {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .results-title {
+            font-size: 1.8em;
+            color: #333;
+        }
+
+        .download-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .label-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .label-option input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .label-option label {
+            margin: 0;
+            font-weight: normal;
+            cursor: pointer;
+        }
+
+        .download-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .download-pdf-btn {
+            background: #dc3545;
+            color: white;
+        }
+
+        .download-word-btn {
+            background: #2b579a;
+            color: white;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .qa-item {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .qa-item:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.1);
+        }
+
+        .qa-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            gap: 15px;
+        }
+
+        .qa-question {
+            font-size: 1.2em;
+            color: #333;
+            font-weight: 600;
+            flex: 1;
+        }
+
+        .qa-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .source-label {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .source-specified {
+            background: #cfe2ff;
+            color: #084298;
+            border: 1px solid #b6d4fe;
+        }
+
+        .source-same-domain {
+            background: #fff3cd;
+            color: #664d03;
+            border: 1px solid #ffecb5;
+        }
+
+        .source-external {
+            background: #f8d7da;
+            color: #842029;
+            border: 1px solid #f5c2c7;
+        }
+
+        .edit-btn, .delete-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: opacity 0.2s;
+        }
+
+        .edit-btn {
+            background: #0d6efd;
+            color: white;
+        }
+
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+        }
+
+        .edit-btn:hover, .delete-btn:hover {
+            opacity: 0.8;
+        }
+
+        .qa-answer {
+            color: #555;
+            line-height: 1.8;
+            white-space: pre-wrap;
+        }
+
+        .edit-mode {
+            border-color: #0d6efd !important;
+            background: #f8f9ff;
+        }
+
+        .edit-textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 15px;
+            border: 2px solid #0d6efd;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: inherit;
+            resize: vertical;
+            margin-top: 10px;
+        }
+
+        .edit-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .save-btn, .cancel-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .save-btn {
+            background: #198754;
+            color: white;
+        }
+
+        .cancel-btn {
+            background: #6c757d;
+            color: white;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #842029;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #dc3545;
+            margin: 20px 0;
+        }
+
+        /* タブ切り替えスタイル */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: #f8f9fa;
+            border: none;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            color: #6c757d;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            background: #0d6efd;
+            color: white;
+            border-bottom: 2px solid #0d6efd;
+        }
+
+        .tab:hover:not(.active) {
+            background: #e9ecef;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .source-code-input {
+            width: 100%;
+            min-height: 300px;
+            padding: 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            resize: vertical;
+            margin-top: 10px;
+        }
+
+        .source-code-input:focus {
+            outline: none;
+            border-color: #0d6efd;
+        }
+
+        .char-count {
+            text-align: right;
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+
+        .char-count.warning {
+            color: #fd7e14;
+            font-weight: 600;
+        }
+
+        .char-count.error {
+            color: #dc3545;
+            font-weight: 600;
+        }
+
+        .success-message {
+            background: #d1e7dd;
+            color: #0f5132;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #198754;
+            margin: 20px 0;
+        }
+
+        .features-list {
+            background: #e7f3ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+        }
+
+        .features-list h3 {
+            color: #0d6efd;
+            margin-bottom: 15px;
+        }
+
+        .features-list ul {
+            list-style-position: inside;
+            color: #333;
+        }
+
+        .features-list li {
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .options-section {
+                grid-template-columns: 1fr;
+            }
+
+            .results-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .download-controls {
+                width: 100%;
+            }
+
+            .download-btn {
+                flex: 1;
+            }
+        }
+    
+        .error-details {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 15px;
+            font-family: monospace;
+        }
+
+        .error-details h4 {
+            color: #856404;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .error-code {
+            background: #f8f9fa;
+            border-left: 4px solid #dc3545;
+            padding: 15px;
+            margin: 10px 0;
+            overflow-x: auto;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .error-explanation {
+            background: #e7f3ff;
+            border-left: 4px solid #0d6efd;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: sans-serif;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .error-suggestions {
+            background: #d1e7dd;
+            border-left: 4px solid #198754;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: sans-serif;
+        }
+
+        .error-suggestions ul {
+            margin: 10px 0 0 0;
+            padding-left: 20px;
+        }
+
+        .error-suggestions li {
+            margin-bottom: 8px;
+        }
+
+        .copy-error-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+
+        .copy-error-btn:hover {
+            background: #5a6268;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛍️ 商品Q&A自動生成システム</h1>
+        <div class="version">Premium v4.7 - 完全版（バグ修正＋自動Q&A数）</div>
+
+        <div class="input-section">
+            <!-- タブ切り替え -->
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('url')">URL入力</button>
+                <button class="tab" onclick="switchTab('source')">HTMLソースコード入力</button>
+            </div>
+
+            <!-- URL入力タブ -->
+            <div id="urlTab" class="tab-content active">
+                <label for="productUrl">商品ページURL:</label>
+                <input type="url" id="productUrl" placeholder="https://example.com/product/..." required>
+                <p style="font-size: 0.85em; color: #6c757d; margin-top: 8px;">
+                    🔒 アクセス制限のあるURLの場合、「HTMLソースコード入力」タブから直接ソースコードを貼り付けられます。
+                </p>
+            </div>
+
+            <!-- ソースコード入力タブ -->
+            <div id="sourceTab" class="tab-content">
+                <label for="sourceCode">商品ページのHTMLソースコード:</label>
+                <p style="font-size: 0.85em; color: #6c757d; margin-bottom: 10px;">
+                    📝 ブラウザでページを開き、右クリック→「ページのソースを表示」でHTMLをコピーして貼り付けてください。<br>
+                    ⚠️ 最大2MB（約2,000,000文字）まで対応。大きすぎる場合はエラーになります。
+                </p>
+                <textarea 
+                    id="sourceCode" 
+                    class="source-code-input" 
+                    placeholder="<!DOCTYPE html>\n<html>\n<head>...</head>\n<body>...\nここにHTMLソースコードを貼り付けてください"
+                    oninput="updateCharCount()"></textarea>
+                <div id="charCount" class="char-count">0 / 2,000,000 文字</div>
+            </div>
+
+            <div class="api-key-section">
+                <h3>🔑 OpenAI APIキー設定</h3>
+                <p>このアプリは高品質なAI生成のためOpenAI APIを使用します。</p>
+                <label for="apiKey">OpenAI APIキー:</label>
+                <input type="password" id="apiKey" placeholder="sk-...">
+                <p style="margin-top: 10px; font-size: 0.85em;">
+                    ⚠️ APIキーは <a href="https://platform.openai.com/api-keys" target="_blank" style="color: #0d6efd;">OpenAI Platform</a> で取得できます。<br>
+                    💡 キーはブラウザに保存され、サーバーには送信されません。
+                </p>
+            </div>
+
+            <div class="options-section">
+                <div class="option-group">
+                    <h4>📊 出力するQ&A数</h4>
+                    <p>生成するQ&Aの数を10個刻みで選択できます（10〜100個）</p>
+                    <label for="qaCount">Q&A数:</label>
+                    <select id="qaCount">
+                        <option value="auto" selected>指定しない（自動で最適な数を生成）</option>
+                        <option value="10">10問</option>
+                        <option value="20">20問</option>
+                        <option value="30">30問</option>
+                        <option value="40">40問</option>
+                        <option value="50">50問</option>
+                        <option value="60">60問</option>
+                        <option value="70">70問</option>
+                        <option value="80">80問</option>
+                        <option value="90">90問</option>
+                        <option value="100">100問</option>
+                    </select>
+                </div>
+
+                <div class="option-group">
+                    <h4>🔍 情報ソースタイプ</h4>
+                    <p>Q&Aの情報源を選択できます。選択したソースのみを元にQ&Aを作成します。</p>
+                    <label for="sourceType">リソースタイプ:</label>
+                    <select id="sourceType">
+                        <option value="both">指定URL + 外部リソース両方</option>
+                        <option value="specified_url">指定URLのみ</option>
+                        <option value="external">外部リソースのみ</option>
+                    </select>
+                </div>
+            </div>
+
+            <button class="generate-btn" onclick="generateQA()">
+                🚀 Q&Aを生成する
+            </button>
+        </div>
+
+        <div class="progress-section" id="progressSection">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill">0%</div>
+            </div>
+            <div class="status-message" id="statusMessage">処理を開始しています...</div>
+        </div>
+
+        <div class="results-section" id="resultsSection">
+            <div class="results-header">
+                <h2 class="results-title">📋 生成結果</h2>
+                <div class="download-controls">
+                    <div class="label-option">
+                        <input type="checkbox" id="includeLabels" checked>
+                        <label for="includeLabels">情報ソースラベルを含める</label>
+                    </div>
+                    <button class="download-btn download-pdf-btn" onclick="downloadPDF()">
+                        <span>📄</span>
+                        <span>PDFダウンロード</span>
+                    </button>
+                    <button class="download-btn download-word-btn" onclick="downloadRTF()">
+                        <span>📝</span>
+                        <span>RTFダウンロード</span>
+                    </button>
+                </div>
+            </div>
+            <div id="qaList"></div>
+        </div>
+
+        <div class="features-list">
+            <h3>✨ v4.7 主要機能</h3>
+            <ul>
+                <li><strong>Q&A数選択機能:</strong> 生成するQ&Aの数を10〜100個まで10個刻みで選択可能</li>
+                <li><strong>リソースタイプ選択機能:</strong> 「指定URLのみ」「外部リソースのみ」「両方」から情報源を選択可能</li>
+                <li><strong>RTF形式ダウンロード:</strong> PDF形式に加えて、RTF (リッチテキスト) 形式でもダウンロード可能 (Word/WordPad/LibreOfficeで開けます)</li>
+                <li><strong>情報ソース別ラベリング:</strong> 各Q&Aの情報源を3段階で自動分類（指定ページ/同ドメイン/外部提案）</li>
+                <li><strong>カテゴリ自動判定:</strong> 靴、アパレル、化粧品、サプリメント、食品など12カテゴリに対応</li>
+                <li><strong>画像OCR分析:</strong> 商品ページの画像から情報を自動抽出</li>
+                <li><strong>外部情報リサーチ:</strong> 不足情報を自動的に外部から補完（AIによる提案として明示）</li>
+                <li><strong>法令遵守機能:</strong> 薬機法、景品表示法、食品表示法に準拠した表現を自動生成</li>
+                <li><strong>編集・削除機能:</strong> 生成後のQ&Aを自由に編集・削除可能</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        let qaData = [];
+        let currentEditingIndex = null;
+        let currentInputMode = 'url'; // 'url' or 'source'
+
+        // ページ読み込み時にAPIキーを復元
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedApiKey = localStorage.getItem('openai_api_key');
+            if (savedApiKey) {
+                document.getElementById('apiKey').value = savedApiKey;
+            }
+        });
+
+        // タブ切り替え関数
+        function switchTab(mode) {
+            currentInputMode = mode;
+            
+            // タブのアクティブ状態を切り替え
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            if (mode === 'url') {
+                tabs[0].classList.add('active');
+                document.getElementById('urlTab').classList.add('active');
+                document.getElementById('sourceTab').classList.remove('active');
+            } else {
+                tabs[1].classList.add('active');
+                document.getElementById('sourceTab').classList.add('active');
+                document.getElementById('urlTab').classList.remove('active');
+            }
+        }
+
+        // 文字数カウント関数
+        function updateCharCount() {
+            const sourceCode = document.getElementById('sourceCode').value;
+            const charCount = sourceCode.length;
+            const maxChars = 2000000; // 2MB
+            const charCountElement = document.getElementById('charCount');
+            
+            charCountElement.textContent = `${charCount.toLocaleString()} / ${maxChars.toLocaleString()} 文字`;
+            
+            // 警告色を変更
+            charCountElement.classList.remove('warning', 'error');
+            if (charCount > maxChars) {
+                charCountElement.classList.add('error');
+            } else if (charCount > maxChars * 0.8) {
+                charCountElement.classList.add('warning');
+            }
+        }
+
+
+        // エラー詳細解析関数
+        function analyzeError(error, context = {}) {
+            const errorMessage = error.message || error.toString();
+            const analysis = {
+                code: errorMessage,
+                type: 'UNKNOWN_ERROR',
+                explanation: '',
+                suggestions: []
+            };
+
+            // タイムアウトエラー
+            if (errorMessage.includes('timeout') || errorMessage.includes('ETIMEDOUT') || 
+                errorMessage.includes('timed out') || errorMessage.includes('Task timed out')) {
+                analysis.type = 'TIMEOUT_ERROR';
+                analysis.explanation = `
+                    <strong>タイムアウトエラー</strong><br>
+                    処理が時間制限（60秒）を超えました。<br>
+                    Vercel Hobby Planでは最大60秒までしか実行できません。<br>
+                    現在のQ&A数（${context.qaCount || '不明'}問）では時間が足りませんでした。
+                `;
+                analysis.suggestions = [
+                    'Q&A数を30問に減らす',
+                    'リソースタイプを「指定URLのみ」に変更',
+                    '「指定しない（自動）」オプションを使用',
+                    'Vercel Pro Plan（$20/月）にアップグレード'
+                ];
+            }
+            // APIキーエラー
+            else if (errorMessage.includes('API key') || errorMessage.includes('Unauthorized') || 
+                     errorMessage.includes('401')) {
+                analysis.type = 'API_KEY_ERROR';
+                analysis.explanation = `
+                    <strong>APIキー認証エラー</strong><br>
+                    OpenAI APIキーが無効または期限切れです。<br>
+                    APIキーが正しいか、クレジットが残っているか確認してください。
+                `;
+                analysis.suggestions = [
+                    'OpenAI Platform (https://platform.openai.com/api-keys) でAPIキーを確認',
+                    '新しいAPIキーを生成',
+                    'OpenAIアカウントのクレジット残高を確認'
+                ];
+            }
+            // レート制限エラー
+            else if (errorMessage.includes('429') || errorMessage.includes('rate limit') ||
+                     errorMessage.includes('Too Many Requests')) {
+                analysis.type = 'RATE_LIMIT_ERROR';
+                analysis.explanation = `
+                    <strong>レート制限エラー</strong><br>
+                    OpenAI APIの使用制限に達しました。<br>
+                    短時間に多くのリクエストを送信したため、一時的にブロックされています。
+                `;
+                analysis.suggestions = [
+                    '1〜2分待ってから再度試す',
+                    'OpenAI APIの使用制限プランをアップグレード'
+                ];
+            }
+            // アクセス拒否エラー
+            else if (errorMessage.includes('403') || errorMessage.includes('Forbidden') ||
+                     errorMessage.includes('Access denied')) {
+                analysis.type = 'ACCESS_DENIED_ERROR';
+                analysis.explanation = `
+                    <strong>アクセス拒否エラー</strong><br>
+                    指定されたURLへのアクセスが拒否されました。<br>
+                    サイトのBot対策やアクセス制限により、情報を取得できませんでした。
+                `;
+                analysis.suggestions = [
+                    '「HTMLソースコード入力」タブからソースコードを直接貼り付ける',
+                    '別のURLを試す',
+                    'リソースタイプを変更する'
+                ];
+            }
+            // ネットワークエラー
+            else if (errorMessage.includes('network') || errorMessage.includes('ECONNREFUSED') ||
+                     errorMessage.includes('fetch failed')) {
+                analysis.type = 'NETWORK_ERROR';
+                analysis.explanation = `
+                    <strong>ネットワークエラー</strong><br>
+                    ネットワーク接続に問題があります。<br>
+                    サーバーへの接続が確立できませんでした。
+                `;
+                analysis.suggestions = [
+                    'インターネット接続を確認',
+                    '数秒待ってから再試行',
+                    'Vercelのステータスページを確認'
+                ];
+            }
+            // メモリ不足エラー
+            else if (errorMessage.includes('memory') || errorMessage.includes('heap') ||
+                     errorMessage.includes('out of memory')) {
+                analysis.type = 'MEMORY_ERROR';
+                analysis.explanation = `
+                    <strong>メモリ不足エラー</strong><br>
+                    サーバーのメモリが不足しました。<br>
+                    処理するデータが大きすぎるか、Q&A数が多すぎます。
+                `;
+                analysis.suggestions = [
+                    'Q&A数を減らす（30問推奨）',
+                    'ソースコードのサイズを減らす（500KB以下推奨）',
+                    'リソースタイプを「指定URLのみ」に変更'
+                ];
+            }
+            // パースエラー
+            else if (errorMessage.includes('parse') || errorMessage.includes('JSON') ||
+                     errorMessage.includes('Unexpected token')) {
+                analysis.type = 'PARSE_ERROR';
+                analysis.explanation = `
+                    <strong>データ解析エラー</strong><br>
+                    サーバーからのレスポンスが正しく解析できませんでした。<br>
+                    データ形式に問題があるか、途中で切断された可能性があります。
+                `;
+                analysis.suggestions = [
+                    'もう一度試す',
+                    'Q&A数を減らす',
+                    'ブラウザのキャッシュをクリアしてリロード'
+                ];
+            }
+            // その他のエラー
+            else {
+                analysis.explanation = `
+                    <strong>予期しないエラー</strong><br>
+                    詳細: ${errorMessage}<br>
+                    原因を特定できませんでした。
+                `;
+                analysis.suggestions = [
+                    'もう一度試す',
+                    'Q&A数を30問に減らす',
+                    'ブラウザのコンソール（F12）で詳細を確認',
+                    '問題が続く場合はサポートに連絡'
+                ];
+            }
+
+            return analysis;
+        }
+
+        // エラー詳細表示関数
+        function displayDetailedError(error, context = {}) {
+            const analysis = analyzeError(error, context);
+            const progressSection = document.getElementById('progressSection');
+            
+            if (!progressSection) {
+                alert('エラー: ' + error.message);
+                return;
+            }
+
+            const errorDetailsHTML = `
+                <div class="error-message">
+                    <strong>❌ エラーが発生しました</strong>
+                    <div class="error-details">
+                        <h4>📋 エラー詳細</h4>
+                        
+                        <div class="error-code">
+                            <strong>エラータイプ:</strong> ${analysis.type}<br>
+                            <strong>エラーコード:</strong><br>
+                            <code>${analysis.code}</code>
+                        </div>
+
+                        <div class="error-explanation">
+                            ${analysis.explanation}
+                        </div>
+
+                        <div class="error-suggestions">
+                            <strong>💡 解決方法:</strong>
+                            <ul>
+                                ${analysis.suggestions.map(s => `<li>${s}</li>`).join('')}
+                            </ul>
+                        </div>
+
+                        <button class="copy-error-btn" onclick="copyErrorToClipboard(\`${analysis.code}\`)">
+                            📋 エラーをコピー
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            progressSection.innerHTML = errorDetailsHTML;
+        }
+
+        // エラーをクリップボードにコピー
+        function copyErrorToClipboard(errorText) {
+            navigator.clipboard.writeText(errorText).then(() => {
+                alert('✅ エラー情報をクリップボードにコピーしました');
+            }).catch(err => {
+                console.error('Copy failed:', err);
+                alert('❌ コピーに失敗しました');
+            });
+        }
+
+        async function generateQA() {
+            const apiKey = document.getElementById('apiKey').value.trim();
+            const sourceType = document.getElementById('sourceType').value;
+
+            // Q&A数の処理
+            let qaCount = document.getElementById('qaCount').value;
+            
+            // 「指定しない（自動）」が選択された場合
+            if (qaCount === 'auto') {
+                // Hobby Planの60秒制限を考慮
+                // リソースタイプによって最適な数を決定
+                if (sourceType === 'specified_url') {
+                    qaCount = 50; // 指定URLのみ：50問（約45秒）
+                } else if (sourceType === 'external') {
+                    qaCount = 30; // 外部リソースのみ：30問（約35秒）
+                } else {
+                    qaCount = 40; // 両方：40問（約50秒）
+                }
+                console.log(`Auto Q&A count selected: ${qaCount} questions (sourceType: ${sourceType})`);
+                updateProgress(5, `自動判定: ${qaCount}問のQ&Aを生成します...`);
+            } else {
+                qaCount = parseInt(qaCount);
+            }
+
+            // APIキー検証
+            if (!apiKey) {
+                alert('OpenAI APIキーを入力してください。');
+                return;
+            }
+
+            // 入力モードによる分岐
+            let url = '';
+            let sourceCode = '';
+            
+            if (currentInputMode === 'url') {
+                url = document.getElementById('productUrl').value.trim();
+                
+                if (!url || !url.startsWith('http')) {
+                    alert('⚠️ 有効なURLを入力してください（例: https://kutsu.com/products/...）');
+                    return;
+                }
+            } else if (currentInputMode === 'source') {
+                sourceCode = document.getElementById('sourceCode').value.trim();
+                
+                if (!sourceCode) {
+                    alert('⚠️ HTMLソースコードを入力してください。');
+                    return;
+                }
+                
+                // 文字数制限チェック
+                if (sourceCode.length > 2000000) {
+                    alert('⚠️ ソースコードが大きすぎます（最大2,000,000文字）。サイズを減らしてください。');
+                    return;
+                }
+                
+                // 基本的なHTML構造チェック
+                if (!sourceCode.includes('<html') && !sourceCode.includes('<body')) {
+                    const confirm = window.confirm(
+                        '⚠️ HTMLタグが見つかりませんでした。\n' +
+                        '正しいHTMLソースコードですか？\n\n' +
+                        '「はい」をクリックするとそのまま続行します。'
+                    );
+                    if (!confirm) {
+                        return;
+                    }
+                }
+                
+                // ダミーURLを設定（バックエンドでの判別用）
+                url = 'source_code_input';
+            }
+            
+            if (!apiKey || apiKey.length < 20) {
+                alert('⚠️ 有効なOpenAI APIキーを入力してください');
+                return;
+            }
+
+            // APIキーを保存
+            localStorage.setItem('openai_api_key', apiKey);
+
+            // UI初期化
+            const generateBtn = document.querySelector('.generate-btn');
+            const progressSection = document.getElementById('progressSection');
+            const resultsSection = document.getElementById('resultsSection');
+            
+            if (!generateBtn || !progressSection || !resultsSection) {
+                console.error('Required DOM elements not found');
+                alert('ページの読み込みに失敗しました。ページを再読み込みしてください。');
+                return;
+            }
+            
+            generateBtn.disabled = true;
+            progressSection.style.display = 'block';
+            resultsSection.style.display = 'none';
+            qaData = [];
+
+            try {
+                updateProgress(10, 'ステップ1: 商品ページを取得中...');
+                
+                const requestBody = { 
+                    url, 
+                    apiKey, 
+                    qaCount, 
+                    sourceType 
+                };
+                
+                // ソースコードモードの場合、sourceCodeを追加
+                if (currentInputMode === 'source') {
+                    requestBody.sourceCode = sourceCode;
+                }
+                
+                const response = await fetch('/api/generate-qa', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (!response.ok) {
+                    let errorMessage = `HTTP error! status: ${response.status}`;
+                    try {
+                        const contentType = response.headers.get('content-type');
+                        if (contentType && contentType.includes('application/json')) {
+                            const errorData = await response.json();
+                            errorMessage = errorData.error || errorMessage;
+                        } else {
+                            const errorText = await response.text();
+                            errorMessage = errorText.substring(0, 200) || errorMessage;
+                        }
+                    } catch (parseError) {
+                        console.error('Error parsing error response:', parseError);
+                    }
+                    throw new Error(errorMessage);
+                }
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop();
+
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            try {
+                                const jsonStr = line.slice(6).trim();
+                                if (!jsonStr) continue;
+                                
+                                const data = JSON.parse(jsonStr);
+                                
+                                if (data.type === 'progress') {
+                                    updateProgress(data.progress, data.message);
+                                } else if (data.type === 'qa') {
+                                    qaData.push(data.data);
+                                } else if (data.type === 'complete') {
+                                    updateProgress(100, '✅ 生成完了！');
+                                    displayResults();
+                                } else if (data.type === 'error') {
+                                    throw new Error(data.message);
+                                }
+                            } catch (parseError) {
+                                console.error('JSON parse error for line:', line, parseError);
+                                // 非JSONレスポンスの場合、エラーとして扱う
+                                if (line.includes('error') || line.includes('Error')) {
+                                    throw new Error('サーバーエラー: ' + line.slice(6, 200));
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error details:', error);
+                
+                // 詳細なエラー表示
+                displayDetailedError(error, {
+                    qaCount: qaCount,
+                    sourceType: sourceType,
+                    inputMode: currentInputMode
+                });
+            } finally {
+                const generateBtn = document.querySelector('.generate-btn');
+                if (generateBtn) {
+                    generateBtn.disabled = false;
+                }
+            }
+        }
+
+        function updateProgress(progress, message) {
+            const progressFill = document.getElementById('progressFill');
+            const statusMessage = document.getElementById('statusMessage');
+            
+            progressFill.style.width = progress + '%';
+            progressFill.textContent = progress + '%';
+            statusMessage.textContent = message;
+        }
+
+        function displayResults() {
+            const resultsSection = document.getElementById('resultsSection');
+            const qaList = document.getElementById('qaList');
+            
+            qaList.innerHTML = qaData.map((qa, index) => `
+                <div class="qa-item" id="qa-${index}">
+                    <div class="qa-header">
+                        <div class="qa-question">${qa.question}</div>
+                        <div class="qa-controls">
+                            ${getSourceLabelHTML(qa.sourceType)}
+                            <button class="edit-btn" onclick="editQA(${index})">✏️ 編集</button>
+                            <button class="delete-btn" onclick="deleteQA(${index})">🗑️ 削除</button>
+                        </div>
+                    </div>
+                    <div class="qa-answer">${qa.answer}</div>
+                </div>
+            `).join('');
+            
+            resultsSection.style.display = 'block';
+            document.getElementById('progressSection').style.display = 'none';
+        }
+
+        function getSourceLabelHTML(sourceType) {
+            const labels = {
+                'specified_page': '<span class="source-label source-specified">📍 指定されたページ</span>',
+                'same_domain': '<span class="source-label source-same-domain">🔗 指定サイト内の別ページ</span>',
+                'external': '<span class="source-label source-external">🤖 ファイアーワークからの提案（回答内容は仮）</span>'
+            };
+            return labels[sourceType] || '';
+        }
+
+        function editQA(index) {
+            if (currentEditingIndex !== null && currentEditingIndex !== index) {
+                cancelEdit(currentEditingIndex);
+            }
+
+            const qaItem = document.getElementById(`qa-${index}`);
+            const qa = qaData[index];
+            
+            qaItem.classList.add('edit-mode');
+            qaItem.innerHTML = `
+                <div class="qa-header">
+                    <div class="qa-question">${qa.question}</div>
+                </div>
+                <textarea class="edit-textarea" id="edit-textarea-${index}">${qa.answer}</textarea>
+                <div class="edit-actions">
+                    <button class="save-btn" onclick="saveEdit(${index})">💾 保存</button>
+                    <button class="cancel-btn" onclick="cancelEdit(${index})">❌ キャンセル</button>
+                </div>
+            `;
+            
+            currentEditingIndex = index;
+        }
+
+        function saveEdit(index) {
+            const textarea = document.getElementById(`edit-textarea-${index}`);
+            qaData[index].answer = textarea.value;
+            currentEditingIndex = null;
+            displayResults();
+        }
+
+        function cancelEdit(index) {
+            currentEditingIndex = null;
+            displayResults();
+        }
+
+        function deleteQA(index) {
+            if (confirm('このQ&Aを削除してもよろしいですか?')) {
+                qaData.splice(index, 1);
+                displayResults();
+            }
+        }
+
+        async function downloadPDF() {
+            if (qaData.length === 0) {
+                alert('ダウンロードするQ&Aがありません。');
+                return;
+            }
+
+            const includeLabels = document.getElementById('includeLabels').checked;
+            const url = document.getElementById('productUrl').value.trim();
+
+            try {
+                const response = await fetch('/api/download-pdf', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        qaData, 
+                        productUrl: url,
+                        includeLabels 
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('PDF Error Response:', errorText);
+                    throw new Error('PDF生成に失敗しました');
+                }
+
+                const blob = await response.blob();
+                const downloadUrl = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = downloadUrl;
+                a.download = `product-qa-${Date.now()}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(downloadUrl);
+                document.body.removeChild(a);
+            } catch (error) {
+                console.error('Download error:', error);
+                alert('PDFのダウンロードに失敗しました: ' + error.message);
+            }
+        }
+
+        async function downloadRTF() {
+            if (qaData.length === 0) {
+                alert('ダウンロードするQ&Aがありません。');
+                return;
+            }
+
+            const includeLabels = document.getElementById('includeLabels').checked;
+            const url = document.getElementById('productUrl').value.trim();
+
+            try {
+                const response = await fetch('/api/download-rtf', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        qaData, 
+                        productUrl: url,
+                        includeLabels 
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('RTF Error Response:', errorText);
+                    throw new Error('RTF文書生成に失敗しました');
+                }
+
+                const blob = await response.blob();
+                const downloadUrl = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = downloadUrl;
+                a.download = `product-qa-${Date.now()}.rtf`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(downloadUrl);
+                document.body.removeChild(a);
+            } catch (error) {
+                console.error('Download error:', error);
+                alert('RTF文書のダウンロードに失敗しました: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>
